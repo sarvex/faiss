@@ -331,16 +331,7 @@ def retrain_AQ_codebook(index, xt):
     for i in range(n):
         C[i][codes[i] + codebook_offsets[:-1]] = 1
 
-    # import pdb; pdb.set_trace()
-    # import scipy
-    # B, residuals, rank, singvals = np.linalg.lstsq(C, xt, rcond=None)
-    if True:
-        B, residuals, rank, singvals = np.linalg.lstsq(C, xt, rcond=None)
-    else:
-        import scipy.linalg
-        import pdb; pdb.set_trace()
-        B, residuals, rank, singvals = scipy.linalg.lstsq(C, xt, )
-
+    B, residuals, rank, singvals = np.linalg.lstsq(C, xt, rcond=None)
     MSE = ((C @ B - xt) ** 2).sum() / n
     print(f"MSE after retrainining: {MSE:g}")
 

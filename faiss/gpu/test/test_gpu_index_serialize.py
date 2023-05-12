@@ -22,10 +22,7 @@ class TestGpuSerialize(unittest.TestCase):
         query = make_t(10, d)
 
         # Construct various GPU index types
-        indexes = []
-
-        # Flat
-        indexes.append(faiss.GpuIndexFlatL2(res, d))
+        indexes = [faiss.GpuIndexFlatL2(res, d)]
 
         # IVF
         nlist = 5

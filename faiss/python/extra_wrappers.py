@@ -131,11 +131,10 @@ def eval_intersection(I1, I2):
     n = I1.shape[0]
     assert I2.shape[0] == n
     k1, k2 = I1.shape[1], I2.shape[1]
-    ninter = 0
-    for i in range(n):
-        ninter += ranklist_intersection_size(
-            k1, swig_ptr(I1[i]), k2, swig_ptr(I2[i]))
-    return ninter
+    return sum(
+        ranklist_intersection_size(k1, swig_ptr(I1[i]), k2, swig_ptr(I2[i]))
+        for i in range(n)
+    )
 
 
 def normalize_L2(x):
@@ -198,7 +197,7 @@ def matrix_bucket_sort_inplace(tab, nbucket=None, nt=0):
     lims : array_like
         cumulative sum of bucket sizes (size vmax + 1)
     """
-    assert tab.dtype == 'int32' or tab.dtype == 'int64'
+    assert tab.dtype in ['int32', 'int64']
     nrow, ncol = tab.shape
     if nbucket is None:
         nbucket = int(tab.max() + 1)
@@ -228,10 +227,7 @@ class ResultHeap:
         self.I = np.zeros((nq, k), dtype='int64')
         self.D = np.zeros((nq, k), dtype='float32')
         self.nq, self.k = nq, k
-        if keep_max:
-            heaps = float_minheap_array_t()
-        else:
-            heaps = float_maxheap_array_t()
+        heaps = float_minheap_array_t() if keep_max else float_maxheap_array_t()
         heaps.k = k
         heaps.nh = nq
         heaps.val = swig_ptr(self.D)
@@ -402,7 +398,7 @@ class Kmeans:
             self.cp = ClusteringParameters()
         for k, v in kwargs.items():
             if k == 'gpu':
-                if v == True or v == -1:
+                if v in [True, -1]:
                     v = get_num_gpus()
                 self.gpu = v
             else:
@@ -448,10 +444,7 @@ class Kmeans:
                 nc, d2 = init_centroids.shape
                 assert d2 == d
                 faiss.copy_array_to_vector(init_centroids.ravel(), clus.centroids)
-            if self.cp.spherical:
-                self.index = IndexFlatIP(d)
-            else:
-                self.index = IndexFlatL2(d)
+            self.index = IndexFlatIP(d) if self.cp.spherical else IndexFlatL2(d)
             if self.gpu:
                 self.index = faiss.index_cpu_to_all_gpus(self.index, ngpu=self.gpu)
             clus.train(x, self.index, weights)

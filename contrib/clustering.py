@@ -393,7 +393,4 @@ def kmeans(k, data, niter=25, seed=1234, checkpoint=None, verbose=True,
             log('storing centroids in', checkpoint)
             np.save(checkpoint, centroids)
 
-    if return_stats:
-        return centroids, iteration_stats
-    else:
-        return centroids
+    return (centroids, iteration_stats) if return_stats else centroids

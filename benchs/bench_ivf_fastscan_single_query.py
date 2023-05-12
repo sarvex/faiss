@@ -32,7 +32,7 @@ nb, d = xb.shape
 nq, d = xq.shape
 nt, d = xt.shape
 
-print('the dimension is {}, {}'.format(nb, d))
+print(f'the dimension is {nb}, {d}')
 
 k = 64
 
@@ -116,7 +116,7 @@ eval_and_plot(f"IVF{nlist},PQ{M}x4fs", single_query=True, implem=14, num_threads
 eval_and_plot(f"IVF{nlist},PQ{M}x4fs", single_query=True, implem=15, num_threads=8)
 
 plt.title("Indices on Bigann50M")
-plt.xlabel("1Recall@{}".format(k))
+plt.xlabel(f"1Recall@{k}")
 plt.ylabel("QPS")
 plt.legend(bbox_to_anchor=(1.02, 0.1), loc='upper left', borderaxespad=0)
 plt.savefig("bench_ivf_fastscan.png", bbox_inches='tight')

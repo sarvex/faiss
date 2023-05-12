@@ -134,8 +134,7 @@ class EvalIVFPQAccuracy(unittest.TestCase):
         mat.apply_py(x)
 
     def do_cpu_to_gpu(self, index_key):
-        ts = []
-        ts.append(time.time())
+        ts = [time.time()]
         (xt, xb, xq) = self.get_dataset(small_one=True)
         nb, d = xb.shape
 
@@ -187,7 +186,7 @@ class EvalIVFPQAccuracy(unittest.TestCase):
         for shard in False, True:
 
             # test on just 2 GPUs
-            res = [faiss.StandardGpuResources() for i in range(2)]
+            res = [faiss.StandardGpuResources() for _ in range(2)]
             co = faiss.GpuMultipleClonerOptions()
             co.shard = shard
 

@@ -158,9 +158,7 @@ def three_metrics(Dref, Iref, Dnew, Inew):
     nq = Iref.shape[0]
     recall_at_1 = (Iref[:, 0] == Inew[:, 0]).sum() / nq
     recall_at_10 = (Iref[:, :1] == Inew[:, :10]).sum() / nq
-    ninter = 0
-    for i in range(nq):
-        ninter += len(np.intersect1d(Inew[i], Iref[i]))
+    ninter = sum(len(np.intersect1d(Inew[i], Iref[i])) for i in range(nq))
     intersection_at_10 = ninter / nq
     return recall_at_1, recall_at_10, intersection_at_10
 
@@ -663,12 +661,12 @@ class TestIVFAQFastScan(unittest.TestCase):
 
         if aq == 'LSQ':
             assert isinstance(q, faiss.LocalSearchQuantizer)
-        if aq == 'RQ':
+        elif aq == 'RQ':
             assert isinstance(q, faiss.ResidualQuantizer)
 
         if st == 'lsq':
             assert q.search_type == AQ.ST_norm_lsq2x4
-        if st == 'rq':
+        elif st == 'rq':
             assert q.search_type == AQ.ST_norm_rq2x4
 
         assert index.by_residual == (r == 'r')

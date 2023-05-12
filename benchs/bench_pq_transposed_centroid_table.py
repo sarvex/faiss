@@ -22,10 +22,7 @@ def unwind_index_ivf(index):
         return index_ivf, vt
     if hasattr(faiss, "IndexRefine") and isinstance(index, faiss.IndexRefine):
         return unwind_index_ivf(faiss.downcast_index(index.base_index))
-    if isinstance(index, faiss.IndexIVF):
-        return index, None
-    else:
-        return None, None
+    return (index, None) if isinstance(index, faiss.IndexIVF) else (None, None)
 
 
 def test_bigann10m(index_file, index_parameters):
@@ -38,7 +35,7 @@ def test_bigann10m(index_file, index_parameters):
     nb, d = xb.shape
     nq, d = xq.shape
 
-    print("Reading index {}".format(index_file))
+    print(f"Reading index {index_file}")
     index = faiss.read_index(index_file)
 
     ps = faiss.ParameterSpace()
@@ -47,12 +44,12 @@ def test_bigann10m(index_file, index_parameters):
     index_ivf, vec_transform = unwind_index_ivf(index)
 
     print('params                                                                      regular    transp_centroids   regular   R@1    R@10   R@100')
+    k = 100
+
     for index_parameter in index_parameters:
         ps.set_index_parameters(index, index_parameter)
 
         print(index_parameter.ljust(70), end=' ')
-
-        k = 100
 
         # warmup
         D, I = index.search(xq, k)
@@ -110,10 +107,7 @@ if __name__ == "__main__":
         quantizer_efsearch = random.choice(quantizer_efsearch_values)
         ht = random.choice(ht_values)
         index_parameters_1.append(
-            "nprobe={},quantizer_efSearch={},ht={}".format(
-                nprobe,
-                quantizer_efsearch,
-                ht)
+            f"nprobe={nprobe},quantizer_efSearch={quantizer_efsearch},ht={ht}"
         )
 
     test_bigann10m(index_file_1, index_parameters_1)
@@ -126,11 +120,7 @@ if __name__ == "__main__":
         quantizer_nprobe = random.choice(quantizer_nprobe_values)
         ht = random.choice(ht_values)
         index_parameters_2.append(
-            "nprobe={},quantizer_k_factor_rf={},quantizer_nprobe={},ht={}".format(
-                nprobe,
-                quantizer_k_factor_rf,
-                quantizer_nprobe,
-                ht)
+            f"nprobe={nprobe},quantizer_k_factor_rf={quantizer_k_factor_rf},quantizer_nprobe={quantizer_nprobe},ht={ht}"
         )
 
     test_bigann10m(index_file_2, index_parameters_2)

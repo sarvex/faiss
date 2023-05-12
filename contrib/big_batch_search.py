@@ -112,11 +112,7 @@ class BigBatchSearcher:
         # prepare database side
         list_ids, xb_l = get_invlist(index.invlists, l)
 
-        if self.decode_func is None:
-            xb_l = xb_l.ravel()
-        else:
-            xb_l = self.decode_func(xb_l)
-
+        xb_l = xb_l.ravel() if self.decode_func is None else self.decode_func(xb_l)
         if self.use_float16:
             xb_l = xb_l.astype('float16')
             xq_l = xq_l.astype('float16')
@@ -131,10 +127,7 @@ class BigBatchSearcher:
         if D is None:
             return
         t0 = time.time()
-        if I is None:
-            I = list_ids
-        else:
-            I = list_ids[I]
+        I = list_ids if I is None else list_ids[I]
         self.rh.add_result_subset(q_subset, D, I)
         self.t_accu[3] += time.time() - t0
 
@@ -143,7 +136,7 @@ class BigBatchSearcher:
 
     def write_checkpoint(self, fname, cur_list_no):
         # write to temp file then move to final file
-        tmpname = fname + ".tmp"
+        tmpname = f"{fname}.tmp"
         pickle.dump(
             {
                 "sizes": self.sizes_in_checkpoint(),
@@ -438,10 +431,12 @@ def big_batch_search(
             prefetched_buckets = prefetched_buckets_a.get()
             bbs.stop_t_accu(4)
 
-            if checkpoint is not None:
-                if (l // list_step) % checkpoint_freq == 0:
-                    print("writing checkpoint %s" % l)
-                    bbs.write_checkpoint(checkpoint, l)
+            if (
+                checkpoint is not None
+                and (l // list_step) % checkpoint_freq == 0
+            ):
+                print(f"writing checkpoint {l}")
+                bbs.write_checkpoint(checkpoint, l)
 
         # flush add
         for ta in to_add:

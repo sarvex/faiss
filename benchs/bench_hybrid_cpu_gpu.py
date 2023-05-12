@@ -176,15 +176,13 @@ class ShardedGPUIndex:
             bs = self.bs
 
             def coarse_quant(i0):
-                if i0 >= nq:
-                    return None
-                return self.quantizer.search(xq[i0:i0 + bs], nprobe)
+                return None if i0 >= nq else self.quantizer.search(xq[i0:i0 + bs], nprobe)
 
             def do_search(rank, i0, qq):
                 gpu_index = faiss.downcast_index(index.at(rank))
                 Dq, Iq = qq
                 Dall[rank, i0:i0 + bs], Iall[rank, i0:i0 + bs] = \
-                    gpu_index.search_preassigned(xq[i0:i0 + bs], k, Iq, Dq)
+                        gpu_index.search_preassigned(xq[i0:i0 + bs], k, Iq, Dq)
 
             qq = coarse_quant(0)
 
@@ -249,8 +247,7 @@ def set_index_parameter(index, name, val):
             for i in range(index.count()):
                 sub_index = index.at(i)
                 set_index_parameter(sub_index, name, val)
-    elif (isinstance(index, faiss.IndexShards) or
-          isinstance(index, faiss.IndexReplicas)):
+    elif isinstance(index, (faiss.IndexShards, faiss.IndexReplicas)):
         for i in range(index.count()):
             sub_index = index.at(i)
             set_index_parameter(sub_index, name, val)
@@ -353,11 +350,7 @@ def main():
 
     print("loading index")
 
-    if args.mmap:
-        io_flag = faiss.IO_FLAG_READ_ONLY | faiss.IO_FLAG_MMAP
-    else:
-        io_flag = 0
-
+    io_flag = faiss.IO_FLAG_READ_ONLY | faiss.IO_FLAG_MMAP if args.mmap else 0
     print(f"load index {args.indexname} {io_flag=:x}")
     index = faiss.read_index(args.indexname, io_flag)
     index_ivf = faiss.extract_index_ivf(index)

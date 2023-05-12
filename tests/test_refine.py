@@ -25,10 +25,10 @@ class TestDistanceComputer(unittest.TestCase):
         for is_FlatCodesDistanceComputer in False, True:
             if not is_FlatCodesDistanceComputer:
                 dc = index.get_distance_computer()
-            else:
-                if not isinstance(index, faiss.IndexFlatCodes):
-                    continue
+            elif isinstance(index, faiss.IndexFlatCodes):
                 dc = index.get_FlatCodesDistanceComputer()
+            else:
+                continue
             self.assertTrue(dc.this.own())
             for q in range(ds.nq):
                 dc.set_query(faiss.swig_ptr(xq[q]))

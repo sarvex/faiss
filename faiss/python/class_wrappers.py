@@ -52,10 +52,10 @@ def replace_method(the_class, name, replacement, ignore_missing=False):
         if ignore_missing:
             return
         raise
-    if orig_method.__name__ == 'replacement_' + name:
+    if orig_method.__name__ == f'replacement_{name}':
         # replacement was done in parent class
         return
-    setattr(the_class, name + '_c', orig_method)
+    setattr(the_class, f'{name}_c', orig_method)
     setattr(the_class, name, replacement)
 
 

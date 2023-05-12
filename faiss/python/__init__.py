@@ -226,14 +226,13 @@ def search_with_parameters(index, x, k, params=None, output_stats=False):
     )
     if not output_stats:
         return distances, labels
-    else:
-        stats = {
-            'ndis': nb_dis[0],
-            'pre_transform_ms': ms_per_stage[0],
-            'coarse_quantizer_ms': ms_per_stage[1],
-            'invlist_scan_ms': ms_per_stage[2],
-        }
-        return distances, labels, stats
+    stats = {
+        'ndis': nb_dis[0],
+        'pre_transform_ms': ms_per_stage[0],
+        'coarse_quantizer_ms': ms_per_stage[1],
+        'invlist_scan_ms': ms_per_stage[2],
+    }
+    return distances, labels, stats
 
 
 range_search_with_parameters_c = range_search_with_parameters
@@ -263,14 +262,13 @@ def range_search_with_parameters(index, x, radius, params=None, output_stats=Fal
     Iout = rev_swig_ptr(res.labels, nd).copy()
     if not output_stats:
         return lims, Dout, Iout
-    else:
-        stats = {
-            'ndis': nb_dis[0],
-            'pre_transform_ms': ms_per_stage[0],
-            'coarse_quantizer_ms': ms_per_stage[1],
-            'invlist_scan_ms': ms_per_stage[2],
-        }
-        return lims, Dout, Iout, stats
+    stats = {
+        'ndis': nb_dis[0],
+        'pre_transform_ms': ms_per_stage[0],
+        'coarse_quantizer_ms': ms_per_stage[1],
+        'invlist_scan_ms': ms_per_stage[2],
+    }
+    return lims, Dout, Iout, stats
 
 
 # IndexProxy was renamed to IndexReplicas, remap the old name for any old code

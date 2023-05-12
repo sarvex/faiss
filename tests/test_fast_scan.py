@@ -107,11 +107,7 @@ class TestRounding(unittest.TestCase):
         # rounded LUT with correction
         index2.implem = implem
         D4, I4 = index2.search(ds.get_queries(), 10)
-        # check accuracy of indexes
-        recalls = {}
-        for rank in 1, 10:
-            recalls[rank] = (Iref[:, :1] == I4[:, :rank]).sum() / nq
-
+        recalls = {rank: (Iref[:, :1] == I4[:, :rank]).sum() / nq for rank in (1, 10)}
         min_r1 = 0.98 if metric == faiss.METRIC_INNER_PRODUCT else 0.99
         self.assertGreaterEqual(recalls[1], min_r1)
         self.assertGreater(recalls[10], 0.995)
@@ -527,7 +523,7 @@ class TestAQFastScan(unittest.TestCase):
         d = 16
         ds = datasets.SyntheticDataset(d, 1000, 2000, 1000, metric=metric)
         gt = ds.get_groundtruth(k=1)
-        index = faiss.index_factory(d, 'RQ8x4' + st, metric_type)
+        index = faiss.index_factory(d, f'RQ8x4{st}', metric_type)
         index.train(ds.get_train())
         index.add(ds.get_database())
         index.nprobe = 16
@@ -572,12 +568,12 @@ class TestAQFastScan(unittest.TestCase):
 
         if aq == 'LSQ':
             assert isinstance(aq, faiss.LocalSearchQuantizer)
-        if aq == 'RQ':
+        elif aq == 'RQ':
             assert isinstance(aq, faiss.ResidualQuantizer)
 
         if st == 'lsq':
             assert aq.search_type == AQ.ST_norm_lsq2x4
-        if st == 'rq':
+        elif st == 'rq':
             assert aq.search_type == AQ.ST_norm_rq2x4
 
     def test_factory(self):

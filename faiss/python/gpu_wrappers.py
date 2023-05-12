@@ -34,8 +34,7 @@ def index_cpu_to_gpu_multiple_py(resources, index, co=None, gpus=None):
 
 
 def index_cpu_to_all_gpus(index, co=None, ngpu=-1):
-    index_gpu = index_cpu_to_gpus_list(index, co=co, gpus=None, ngpu=ngpu)
-    return index_gpu
+    return index_cpu_to_gpus_list(index, co=co, gpus=None, ngpu=ngpu)
 
 
 def index_cpu_to_gpus_list(index, co=None, gpus=None, ngpu=-1):
@@ -43,13 +42,10 @@ def index_cpu_to_gpus_list(index, co=None, gpus=None, ngpu=-1):
     use first n GPU's. gpus mut be a list or None.
     co is a GpuMultipleClonerOptions
     """
-    if (gpus is None) and (ngpu == -1):  # All blank
-        gpus = range(get_num_gpus())
-    elif (gpus is None) and (ngpu != -1):  # Get number of GPU's only
-        gpus = range(ngpu)
+    if gpus is None:
+        gpus = range(get_num_gpus()) if ngpu == -1 else range(ngpu)
     res = [StandardGpuResources() for _ in gpus]
-    index_gpu = index_cpu_to_gpu_multiple_py(res, index, co, gpus)
-    return index_gpu
+    return index_cpu_to_gpu_multiple_py(res, index, co, gpus)
 
 # allows numpy ndarray usage with bfKnn
 

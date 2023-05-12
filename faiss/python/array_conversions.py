@@ -77,12 +77,13 @@ deprecated_name_map = {
 }
 
 for depr_prefix, base_prefix in deprecated_name_map.items():
-    _make_deprecated_swig_class(depr_prefix + "Vector", base_prefix + "Vector")
+    _make_deprecated_swig_class(f"{depr_prefix}Vector", f"{base_prefix}Vector")
 
     # same for the three legacy *VectorVector classes
     if depr_prefix in ['Float', 'Long', 'Byte']:
-        _make_deprecated_swig_class(depr_prefix + "VectorVector",
-                                    base_prefix + "VectorVector")
+        _make_deprecated_swig_class(
+            f"{depr_prefix}VectorVector", f"{base_prefix}VectorVector"
+        )
 
 # mapping from vector names in swigfaiss.swig and the numpy dtype names
 # TODO: once deprecated classes are removed, remove the dict and just use .lower() below
@@ -124,9 +125,9 @@ def copy_array_to_vector(a, v):
     classname = v.__class__.__name__
     assert classname.endswith('Vector')
     dtype = np.dtype(vector_name_map[classname[:-6]])
-    assert dtype == a.dtype, (
-        'cannot copy a %s array to a %s (should be %s)' % (
-            a.dtype, classname, dtype))
+    assert (
+        dtype == a.dtype
+    ), f'cannot copy a {a.dtype} array to a {classname} (should be {dtype})'
     v.resize(n)
     if n > 0:
         memcpy(v.data(), swig_ptr(a), a.nbytes)

@@ -183,12 +183,8 @@ class TestMerge2(unittest.TestCase):
         ds = SyntheticDataset(110, 1000, 1000, 100)
         index_trained = faiss.index_factory(ds.d, factory_key)
         index_trained.train(ds.get_train())
-        # test both clone and index_read/write
-        if True:
-            index1 = faiss.deserialize_index(
-                faiss.serialize_index(index_trained))
-        else:
-            index1 = faiss.clone_index(index_trained)
+        index1 = faiss.deserialize_index(
+            faiss.serialize_index(index_trained))
         # assert index1.aq.qnorm.ntotal == index_trained.aq.qnorm.ntotal
 
         index1.add(ds.get_database())

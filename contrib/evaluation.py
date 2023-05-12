@@ -87,11 +87,7 @@ def counts_to_PR(ngt, nres, ninter, mode="overall"):
     if mode == "overall":
         ngt, nres, ninter = ngt.sum(), nres.sum(), ninter.sum()
 
-        if nres > 0:
-            precision = ninter / nres
-        else:
-            precision = 1.0
-
+        precision = ninter / nres if nres > 0 else 1.0
         if ngt > 0:
             recall = ninter / ngt
         elif nres == 0:
@@ -255,12 +251,11 @@ def test_ref_range_results(lims_ref, Dref, Iref,
         Ii_new = Inew[l0:l1]
         Di_ref = Dref[l0:l1]
         Di_new = Dnew[l0:l1]
-        if np.all(Ii_ref == Ii_new): # easy
-            pass
-        else:
+        if not np.all(Ii_ref == Ii_new):
             def sort_by_ids(I, D):
                 o = I.argsort()
                 return I[o], D[o]
+
             # sort both
             (Ii_ref, Di_ref) = sort_by_ids(Ii_ref, Di_ref)
             (Ii_new, Di_new) = sort_by_ids(Ii_new, Di_new)
@@ -294,10 +289,9 @@ class OperatingPoints:
         raise NotImplemented
 
     def is_pareto_optimal(self, perf_new, t_new):
-        for _, perf, t in self.operating_points:
-            if perf >= perf_new and t <= t_new:
-                return False
-        return True
+        return not any(
+            perf >= perf_new and t <= t_new for _, perf, t in self.operating_points
+        )
 
     def predict_bounds(self, key):
         """ predicts the bound on time and performance """
@@ -305,12 +299,10 @@ class OperatingPoints:
         max_perf = 1.0
         for key2, perf, t in self.operating_points + self.suboptimal_points:
             cmp = self.compare_keys(key, key2)
-            if cmp > 0: # key2 > key
-                if t > min_time:
-                    min_time = t
-            if cmp < 0: # key2 < key
-                if perf < max_perf:
-                    max_perf = perf
+            if cmp > 0 and t > min_time:
+                min_time = t
+            if cmp < 0 and perf < max_perf:
+                max_perf = perf
         return max_perf, min_time
 
     def should_run_experiment(self, key):
@@ -354,9 +346,7 @@ class OperatingPointsWithRanges(OperatingPoints):
     def compare_keys(self, k1, k2):
         if np.all(k1 >= k2):
             return 1
-        if np.all(k2 >= k1):
-            return -1
-        return 0
+        return -1 if np.all(k2 >= k1) else 0
 
     def do_nothing_key(self):
         return np.zeros(len(self.ranges), dtype=int)
@@ -411,11 +401,7 @@ class TimerIter:
                 faiss.omp_set_num_threads(timer.remember_nt)
             ts = np.array(self.ts)
             times = ts[1:] - ts[:-1]
-            if len(times) == timer.runs:
-                timer.times = times[timer.warmup :]
-            else:
-                # if timeout, we use all the runs
-                timer.times = times[:]
+            timer.times = times[timer.warmup :] if len(times) == timer.runs else times[:]
             raise StopIteration
 
 class RepeatTimer:
